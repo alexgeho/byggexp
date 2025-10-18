@@ -7,12 +7,14 @@ import { randomUUID } from 'node:crypto';
 
 @injectable()
 export class AuthService {
+
     constructor(
         @inject(UserRepository) private readonly repo: UserRepository,
         @inject(EmailManager) private readonly emailManager: EmailManager // ✅ внедрили EmailManager
     ) {}
 
     async register(email: string, password: string, role: string = 'worker') {
+
         const existing = await this.repo.findByEmail(email);
         if (existing) throw new Error('User already exists');
 
@@ -25,11 +27,10 @@ export class AuthService {
             role,
             emailConfirmation: {
                 emailConfirmationCode,
-                emailConfirmationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 часа
+                emailConfirmationExpires: new Date(Date.now() + 2 * 60 * 60 * 1000),
             },
         });
 
-        // ✅ Отправка письма
         await this.emailManager.sendConfirmationEmail(email, emailConfirmationCode);
 
         return user;
@@ -49,5 +50,20 @@ export class AuthService {
         );
 
         return { token, role: user.role };
+    }
+
+    async confirmation (code:string) {
+
+        const user = await this.repo.findUserByCode(code);
+        if (!user) throw new Error('Invalid code');
+
+        if (user.emailConfirmation?.emailConfirmationExpires && user.emailConfirmation.emailConfirmationExpires < new Date()) {
+            throw new Error('Code expired');
+        }
+
+        user.emailConfirmation.isEmailConfirmed = true;
+        await user.save();
+
+
     }
 }

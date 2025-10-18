@@ -25,4 +25,16 @@ export class AuthController {
             res.status(400).json({ error: e.message });
         }
     }
-}
+
+    async confirmation(req: Request, res: Response) {
+        try {
+            const { code } = req.params;
+
+            const result = await this.service.confirmation(code);
+
+            res.json(result);
+
+        } catch (e: any) {
+            res.status(400).json({ error: e.message });
+        }
+}}
