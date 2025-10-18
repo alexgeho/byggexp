@@ -1,6 +1,6 @@
-import { Request, Response } from 'express';
-import { container } from 'tsyringe';
-import { AuthService } from './auth.service';
+import {Request, Response} from 'express';
+import {container} from 'tsyringe';
+import {AuthService} from './auth.service';
 
 export class AuthController {
 
@@ -8,33 +8,43 @@ export class AuthController {
 
     async register(req: Request, res: Response) {
         try {
-            const { email, password, role } = req.body;
+            const {email, password, role} = req.body;
             const user = await this.service.register(email, password, role);
-            res.status(201).json({ message: 'User created', user });
+            res.status(201).json({message: 'User created', user});
         } catch (e: any) {
-            res.status(400).json({ error: e.message });
+            res.status(400).json({error: e.message});
         }
     }
 
     async login(req: Request, res: Response) {
         try {
-            const { email, password } = req.body;
+            const {email, password} = req.body;
             const result = await this.service.login(email, password);
             res.json(result);
         } catch (e: any) {
-            res.status(400).json({ error: e.message });
+            res.status(400).json({error: e.message});
         }
     }
 
     async confirmation(req: Request, res: Response) {
         try {
-            const { code } = req.params;
+            const {code} = req.params;
 
             const result = await this.service.confirmation(code);
 
-            res.json(result);
+            res.send(`
+  <html>
+    <head><title>Email confirmed</title></head>
+    <body style="font-family: sans-serif; text-align: center; padding-top: 50px;">
+      <h1 style="color: green;">✅ Email successfully confirmed!</h1>
+      <p>You are welcome now.</p>
+    </body>
+  </html>
+`);
+
 
         } catch (e: any) {
-            res.status(400).json({ error: e.message });
+            res.status(400).json({error: e.message});
         }
-}}
+    }
+}

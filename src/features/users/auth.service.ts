@@ -13,7 +13,7 @@ export class AuthService {
         @inject(EmailManager) private readonly emailManager: EmailManager // ✅ внедрили EmailManager
     ) {}
 
-    async register(email: string, password: string, role: string = 'worker') {
+    async register(email: string, password: string, role?: string) {
 
         const existing = await this.repo.findByEmail(email);
         if (existing) throw new Error('User already exists');
