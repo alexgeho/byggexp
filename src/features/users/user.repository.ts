@@ -1,11 +1,6 @@
 import { injectable } from 'tsyringe';
 import { UserModel } from './domain/user.model';
 
-type UserData = {
-    email: string;
-    password: string;
-    role: string;
-};
 
 @injectable()
 export class UserRepository {
@@ -13,7 +8,7 @@ export class UserRepository {
         return UserModel.findOne({ email });
     }
 
-    async create(data: UserData) {
+    async create(data: any) {
         const user = new UserModel(data);
         return user.save();
     }

@@ -1,5 +1,27 @@
+# dependencies
 node_modules/
+.pnpm-store/
+
+# compiled output
 dist/
+*.js
+*.js.map
+
+# environment variables
 .env
+
+# IDE / editor files
 .idea/
+.vscode/
+
+# logs
 *.log
+npm-debug.log*
+pnpm-debug.log*
+
+# system files
+.DS_Store
+
+# temporary
+tmp/
+temp/

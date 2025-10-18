@@ -1,27 +1,37 @@
 import { injectable, inject } from 'tsyringe';
 import { UserRepository } from './user.repository';
+import { EmailManager } from './adapters/email.manager'; // ✅ путь подправь под свой проект
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import {randomUUID} from "node:crypto";
+import { randomUUID } from 'node:crypto';
 
 @injectable()
 export class AuthService {
-
-    constructor(@inject(UserRepository) private readonly repo: UserRepository
+    constructor(
+        @inject(UserRepository) private readonly repo: UserRepository,
+        @inject(EmailManager) private readonly emailManager: EmailManager // ✅ внедрили EmailManager
     ) {}
 
-
     async register(email: string, password: string, role: string = 'worker') {
-
         const existing = await this.repo.findByEmail(email);
         if (existing) throw new Error('User already exists');
 
         const hashed = await bcrypt.hash(password, 10);
+        const emailConfirmationCode = randomUUID();
 
-        const emailConfirmationCode = randomUUID()
+        const user = await this.repo.create({
+            email,
+            password: hashed,
+            role,
+            emailConfirmation: {
+                emailConfirmationCode,
+                emailConfirmationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 часа
+            },
+        });
 
-        const user
-            = await this.repo.create({ email, password: hashed, role, emailConfirmationCode });
+        // ✅ Отправка письма
+        await this.emailManager.sendConfirmationEmail(email, emailConfirmationCode);
+
         return user;
     }
 
