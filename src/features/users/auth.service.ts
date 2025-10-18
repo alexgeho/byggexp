@@ -2,6 +2,7 @@ import { injectable, inject } from 'tsyringe';
 import { UserRepository } from './user.repository';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import {randomUUID} from "node:crypto";
 
 @injectable()
 export class AuthService {
@@ -11,11 +12,16 @@ export class AuthService {
 
 
     async register(email: string, password: string, role: string = 'worker') {
+
         const existing = await this.repo.findByEmail(email);
         if (existing) throw new Error('User already exists');
 
         const hashed = await bcrypt.hash(password, 10);
-        const user = await this.repo.create({ email, password: hashed, role });
+
+        const emailConfirmationCode = randomUUID()
+
+        const user
+            = await this.repo.create({ email, password: hashed, role, emailConfirmationCode });
         return user;
     }
 
