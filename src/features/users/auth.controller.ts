@@ -20,7 +20,14 @@ export class AuthController {
         try {
             const {email, password} = req.body;
             const result = await this.service.login(email, password);
-            res.json(result);
+
+            res
+                .header('Authorization', `Bearer ${result.token}`)
+                .status(200)
+                .json({ message: 'Login successful' });
+
+
+
         } catch (e: any) {
             res.status(400).json({error: e.message});
         }

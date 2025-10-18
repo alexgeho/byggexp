@@ -9,8 +9,8 @@ import { randomUUID } from 'node:crypto';
 export class AuthService {
 
     constructor(
-        @inject(UserRepository) private readonly repo: UserRepository,
-        @inject(EmailManager) private readonly emailManager: EmailManager // ✅ внедрили EmailManager
+        private readonly repo: UserRepository,
+        private readonly emailManager: EmailManager
     ) {}
 
     async register(email: string, password: string, role?: string) {
@@ -44,12 +44,12 @@ export class AuthService {
         if (!isMatch) throw new Error('Invalid password');
 
         const token = jwt.sign(
-            { id: user._id, role: user.role },
+            { id: user._id },
             process.env.JWT_SECRET!,
             { expiresIn: '7d' }
         );
 
-        return { token, role: user.role };
+        return { token};
     }
 
     async confirmation (code:string) {

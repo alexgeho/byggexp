@@ -33,18 +33,5 @@ const UserSchema = new Schema<User>({
     createdAt: { type: Date, default: Date.now },
 });
 
-// Хэширование
-UserSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) return next();
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-});
-
-// Метод сравнения пароля
-UserSchema.methods.comparePassword = async function (candidate: string) {
-    return bcrypt.compare(candidate, this.password);
-};
-
 // Модель
 export const UserModel = model<User>('User', UserSchema);
