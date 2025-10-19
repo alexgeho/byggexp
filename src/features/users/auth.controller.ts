@@ -1,6 +1,7 @@
 import {Request, Response} from 'express';
 import {container} from 'tsyringe';
 import {AuthService} from './auth.service';
+import {RegistrationDTO} from "./DTO/registration.dto";
 
 export class AuthController {
 
@@ -8,8 +9,8 @@ export class AuthController {
 
     async register(req: Request, res: Response) {
         try {
-            const {email, password, role} = req.body;
-            const user = await this.service.register(email, password, role);
+            const dto: RegistrationDTO = req.body;
+            const user = await this.service.register(dto);
             res.status(201).json({message: 'User created', user});
         } catch (e: any) {
             res.status(400).json({error: e.message});

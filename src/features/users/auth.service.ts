@@ -4,6 +4,7 @@ import { EmailManager } from './adapters/email.manager'; // ✅ путь под�
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { randomUUID } from 'node:crypto';
+import {RegistrationDTO} from "./DTO/registration.dto";
 
 @injectable()
 export class AuthService {
@@ -13,25 +14,29 @@ export class AuthService {
         private readonly emailManager: EmailManager
     ) {}
 
-    async register(email: string, password: string, role?: string) {
+    async register(dto: RegistrationDTO) {
 
-        const existing = await this.repo.findByEmail(email);
+        const existing = await this.repo.findByEmail(dto.email);
         if (existing) throw new Error('User already exists');
 
-        const hashed = await bcrypt.hash(password, 10);
+        const hashed = await bcrypt.hash(dto.password, 10);
         const emailConfirmationCode = randomUUID();
 
         const user = await this.repo.create({
-            email,
+            firstName: dto.firstName,
+            lastName: dto.lastName,
+            company: dto.company,
+            phone: dto.phone,
+            email: dto.email,
             password: hashed,
-            role,
+            role: dto.role,
             emailConfirmation: {
                 emailConfirmationCode,
                 emailConfirmationExpires: new Date(Date.now() + 2 * 60 * 60 * 1000),
             },
         });
 
-        await this.emailManager.sendConfirmationEmail(email, emailConfirmationCode);
+        await this.emailManager.sendConfirmationEmail(dto.email, emailConfirmationCode);
 
         return user;
     }
